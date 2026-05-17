@@ -1,14 +1,9 @@
-/* ═══════════════════════════════════════════════
-   QuickTask — popup.js
-   ═══════════════════════════════════════════════ */
 
 let tasks         = [];
 let hideCompleted = false;
 
-// ── Drag state ──────────────────────────────────
 let dragSrcId = null;
 
-// ── DOM refs ────────────────────────────────────
 const taskInput     = document.getElementById('task-input');
 const addBtn        = document.getElementById('add-btn');
 const taskList      = document.getElementById('task-list');
@@ -18,11 +13,9 @@ const progressBar   = document.getElementById('progress-bar');
 const toggleHideBtn = document.getElementById('toggle-hide-btn');
 const currentDateEl = document.getElementById('current-date');
 
-// ── Init ────────────────────────────────────────
 setDate();
 loadTasks();
 
-// ── Basic events ────────────────────────────────
 addBtn.addEventListener('click', addTask);
 taskInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addTask(); });
 toggleHideBtn.addEventListener('click', () => {
@@ -32,7 +25,6 @@ toggleHideBtn.addEventListener('click', () => {
   renderTasks();
 });
 
-// ── Keyboard shortcut: focus input ──────────────
 document.addEventListener('keydown', (e) => {
   const mod = e.ctrlKey || e.metaKey;
   if (mod && e.shiftKey && e.key.toLowerCase() === 't') {
@@ -42,13 +34,11 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// ── Date ────────────────────────────────────────
 function setDate() {
   const opts = { weekday: 'short', month: 'short', day: 'numeric' };
   currentDateEl.textContent = new Date().toLocaleDateString('en-US', opts).toUpperCase();
 }
 
-// ── Storage ─────────────────────────────────────
 function loadTasks() {
   chrome.storage.local.get(['qt_tasks', 'qt_hide'], (result) => {
     tasks         = result.qt_tasks || [];
@@ -62,7 +52,6 @@ function saveTasks() {
   chrome.storage.local.set({ qt_tasks: tasks, qt_hide: hideCompleted });
 }
 
-// ── Actions ─────────────────────────────────────
 function addTask() {
   const text = taskInput.value.trim();
   if (!text) { taskInput.focus(); return; }
@@ -84,17 +73,13 @@ function deleteTask(id) {
   renderTasks();
 }
 
-// ── Edit task ────────────────────────────────────
 function startEdit(id, labelEl, li) {
-  // Don't allow editing completed tasks
   const task = tasks.find(t => t.id === id);
   if (!task || task.completed) return;
 
-  // Disable dragging while editing
   li.draggable = false;
   li.classList.add('editing');
 
-  // Replace label with an input
   const input = document.createElement('input');
   input.type      = 'text';
   input.className = 'edit-input';
@@ -109,11 +94,11 @@ function startEdit(id, labelEl, li) {
       task.text = newText;
       saveTasks();
     }
-    renderTasks(); // always re-render to restore label
+    renderTasks(); 
   }
 
   function cancelEdit() {
-    renderTasks(); // discard, just re-render
+    renderTasks(); 
   }
 
   input.addEventListener('keydown', function(e) {
@@ -121,14 +106,12 @@ function startEdit(id, labelEl, li) {
     if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
   });
 
-  // Commit when clicking outside
   input.addEventListener('blur', function() {
     // small timeout so Escape key fires before blur
     setTimeout(commitEdit, 100);
   });
 }
 
-// ── Drag helpers ─────────────────────────────────
 function getTask(id)  { return tasks.find(t => t.id === id); }
 function getLi(id)    { return taskList.querySelector(`[data-id="${id}"]`); }
 function clearStates() {
@@ -191,7 +174,6 @@ function onDrop(e, targetId) {
   renderTasks();
 }
 
-// ── Render ───────────────────────────────────────
 function renderTasks() {
   taskList.innerHTML = '';
 
@@ -235,33 +217,26 @@ function renderTasks() {
         '<circle cx="5.5" cy="12" r="1.2"/><circle cx="10.5" cy="12" r="1.2"/>' +
       '</svg>';
 
-    // Checkbox
     const cb = document.createElement('input');
     cb.type      = 'checkbox';
     cb.className = 'task-checkbox';
     cb.checked   = task.completed;
     cb.addEventListener('change', function() { toggleTask(task.id); });
 
-    // Label — double click to edit
     const label = document.createElement('span');
     label.className   = 'task-label';
     label.textContent = task.text;
 
     if (!task.completed) {
-      // Single click = toggle (only if not editing)
-      label.addEventListener('click', function() { toggleTask(task.id); });
-      // Double click = enter edit mode
       label.addEventListener('dblclick', function(e) {
         e.stopPropagation();
         startEdit(task.id, label, li);
       });
-      label.title = 'Click to complete · Double-click to edit';
+      label.title = 'Double-click to edit';
     } else {
-      label.addEventListener('click', function() { toggleTask(task.id); });
-      label.title = 'Click to uncomplete';
+      label.title = 'Uncheck to restore';
     }
 
-    // Edit pencil button (only on incomplete tasks)
     const editBtn = document.createElement('button');
     editBtn.className = 'edit-btn';
     editBtn.title     = 'Edit task';
@@ -280,7 +255,6 @@ function renderTasks() {
       editBtn.style.display = 'none';
     }
 
-    // Delete
     const del = document.createElement('button');
     del.className   = 'delete-btn';
     del.textContent = '×';
