@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "QuickTask",
+  "version": "1.1.0",
+  "description": "A minimal task manager that lives in your browser toolbar.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "QuickTask"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default":  "Ctrl+Shift+K",
+        "mac":      "Command+Shift+K"
+      },
+      "description": "Open QuickTask"
+    }
+  }
+}
