@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PSX Watch</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- ── Header ── -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-mark">
+          <span class="brand-bull">▲</span>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">PSX Watch</span>
+          <span class="brand-sub">Pakistan Stock Exchange</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <span id="market-status" class="market-status closed">Closed</span>
+        <span id="last-updated" class="last-updated"></span>
+      </div>
+    </header>
+
+    <!-- ── Tabs ── -->
+    <div class="tabs">
+      <button class="tab active" data-tab="watchlist">Watchlist</button>
+      <button class="tab" data-tab="payouts">Payouts</button>
+    </div>
+
+    <!-- ── Watchlist Tab ── -->
+    <div id="tab-watchlist" class="tab-content active">
+
+      <div class="input-row">
+        <input
+          type="text"
+          id="symbol-input"
+          class="symbol-input"
+          placeholder="Add symbol e.g. MARI"
+          maxlength="10"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button id="add-btn" class="add-btn" title="Add stock">+</button>
+      </div>
+
+      <div id="watchlist-container" class="watchlist-container">
+        <!-- stocks rendered here -->
+      </div>
+
+      <p id="empty-watchlist" class="empty-state" style="display:none;">
+        <span class="empty-icon">📊</span>
+        <span class="empty-title">No stocks added</span>
+        <span class="empty-sub">Type a PSX symbol above to get started</span>
+      </p>
+
+    </div>
+
+    <!-- ── Payouts Tab ── -->
+    <div id="tab-payouts" class="tab-content">
+
+      <div id="payouts-container" class="payouts-container">
+        <!-- payouts rendered here -->
+      </div>
+
+      <p id="empty-payouts" class="empty-state" style="display:none;">
+        <span class="empty-icon">💸</span>
+        <span class="empty-title">No upcoming payouts</span>
+        <span class="empty-sub">Add stocks to your watchlist to see dividends</span>
+      </p>
+
+    </div>
+
+    <!-- ── Footer ── -->
+    <footer class="footer">
+      <span>
+        <span id="data-source-badge" class="source-badge mock">Mock</span>
+        · <span id="refresh-btn" class="refresh-link">Refresh</span>
+      </span>
+      <span id="stock-count" class="stock-count">0 stocks</span>
+    </footer>
+
+  </div>
+
+  <!--
+    ── SWAP DATA SOURCE HERE ─────────────────────────────────
+    Mock data (offline, always works):
+      <script src="api.js"></script>
+
+    Live PSX Terminal data (auto-falls back to mock if down):
+      <script src="api-live.js"></script>
+    ─────────────────────────────────────────────────────── -->
+  <script src="api.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
