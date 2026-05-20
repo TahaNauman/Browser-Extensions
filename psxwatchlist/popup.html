@@ -8,7 +8,6 @@
 <body>
   <div class="app">
 
-    <!-- ── Header ── -->
     <header class="header">
       <div class="brand">
         <div class="brand-mark">
@@ -25,13 +24,11 @@
       </div>
     </header>
 
-    <!-- ── Tabs ── -->
     <div class="tabs">
       <button class="tab active" data-tab="watchlist">Watchlist</button>
       <button class="tab" data-tab="payouts">Payouts</button>
     </div>
 
-    <!-- ── Watchlist Tab ── -->
     <div id="tab-watchlist" class="tab-content active">
 
       <div class="input-row">
@@ -48,7 +45,6 @@
       </div>
 
       <div id="watchlist-container" class="watchlist-container">
-        <!-- stocks rendered here -->
       </div>
 
       <p id="empty-watchlist" class="empty-state" style="display:none;">
@@ -59,11 +55,9 @@
 
     </div>
 
-    <!-- ── Payouts Tab ── -->
     <div id="tab-payouts" class="tab-content">
 
       <div id="payouts-container" class="payouts-container">
-        <!-- payouts rendered here -->
       </div>
 
       <p id="empty-payouts" class="empty-state" style="display:none;">
@@ -74,7 +68,6 @@
 
     </div>
 
-    <!-- ── Footer ── -->
     <footer class="footer">
       <span>
         <span id="data-source-badge" class="source-badge mock">Mock</span>
@@ -88,10 +81,10 @@
   <!--
     ── SWAP DATA SOURCE HERE ─────────────────────────────────
     Mock data (offline, always works):
-      <script src="api.js"></script>
+      <script src="api-mock.js"></script>
 
     Live PSX Terminal data (auto-falls back to mock if down):
-      <script src="api-live.js"></script>
+      <script src="api.js"></script>
     ─────────────────────────────────────────────────────── -->
   <script src="api.js"></script>
   <script src="popup.js"></script>
