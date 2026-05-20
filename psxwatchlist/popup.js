@@ -1,14 +1,8 @@
-/* ═══════════════════════════════════════════════
-   PSX Watch — popup.js
-   ═══════════════════════════════════════════════ */
-
-// ── State ──────────────────────────────────────
 let watchlist  = [];   // ['MARI', 'HBL', ...]
 let stockData  = {};   // { MARI: { price, change, ... }, ... }
 let payoutData = {};   // { HBL: { type, amount, exDate }, ... }
 let isLoading  = false;
 
-// ── DOM refs ───────────────────────────────────
 const symbolInput        = document.getElementById('symbol-input');
 const addBtn             = document.getElementById('add-btn');
 const watchlistContainer = document.getElementById('watchlist-container');
@@ -20,7 +14,6 @@ const stockCount         = document.getElementById('stock-count');
 const refreshBtn         = document.getElementById('refresh-btn');
 const marketStatus       = document.getElementById('market-status');
 
-// ── Tabs ───────────────────────────────────────
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', function() {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -30,11 +23,9 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
-// ── Init ───────────────────────────────────────
 loadWatchlist();
 setMarketStatus();
 
-// ── Events ─────────────────────────────────────
 addBtn.addEventListener('click', addStock);
 symbolInput.addEventListener('keydown', e => { if (e.key === 'Enter') addStock(); });
 refreshBtn.addEventListener('click', () => fetchAllData());
@@ -43,7 +34,6 @@ symbolInput.addEventListener('input', function() {
   this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
 });
 
-// ── Market status ──────────────────────────────
 function setMarketStatus() {
   // PSX hours: Mon-Fri 9:30am - 3:30pm PKT (UTC+5)
   const now = new Date();
@@ -62,12 +52,11 @@ function setMarketStatus() {
   marketStatus.className   = 'market-status ' + (isOpen ? 'open' : 'closed');
 }
 
-// ── Storage ────────────────────────────────────
 function loadWatchlist() {
   chrome.storage.local.get(['psx_watchlist'], result => {
     watchlist = result.psx_watchlist || [];
     if (watchlist.length > 0) {
-      renderWatchlist(); // render skeletons immediately
+      renderWatchlist();
       fetchAllData();
     } else {
       renderWatchlist();
@@ -79,7 +68,6 @@ function saveWatchlist() {
   chrome.storage.local.set({ psx_watchlist: watchlist });
 }
 
-// ── Add / Remove ───────────────────────────────
 async function addStock() {
   const symbol = symbolInput.value.trim().toUpperCase();
   if (!symbol) { symbolInput.focus(); return; }
@@ -90,7 +78,6 @@ async function addStock() {
     return;
   }
 
-  // Validate
   const addBtnEl = addBtn;
   addBtnEl.textContent = '…';
   addBtnEl.disabled = true;
@@ -107,7 +94,6 @@ async function addStock() {
     saveWatchlist();
     symbolInput.value = '';
 
-    // Fetch data for the new stock
     renderWatchlist();
     const [sd, pd] = await Promise.all([
       fetchStockData(symbol),
@@ -137,11 +123,10 @@ function removeStock(symbol) {
   updateFooter();
 }
 
-// ── Fetch all ──────────────────────────────────
 async function fetchAllData() {
   if (watchlist.length === 0) return;
   isLoading = true;
-  renderWatchlist(); // show skeletons
+  renderWatchlist();
 
   try {
     const results = await Promise.all(
@@ -171,7 +156,6 @@ async function fetchAllData() {
   }
 }
 
-// ── Render Watchlist ───────────────────────────
 function renderWatchlist() {
   watchlistContainer.innerHTML = '';
 
@@ -187,7 +171,6 @@ function renderWatchlist() {
   watchlist.forEach(symbol => {
     const data = stockData[symbol];
 
-    // Show skeleton only while actively loading, skip entirely if no data after load
     if (!isLoading && !data) return;
 
     const card = document.createElement('div');
@@ -195,7 +178,6 @@ function renderWatchlist() {
     card.dataset.symbol = symbol;
 
     if (isLoading || !data) {
-      // Skeleton state — only during active fetch
       card.classList.add('skeleton');
       card.innerHTML = `
         <div class="stock-main">
@@ -231,7 +213,6 @@ function renderWatchlist() {
     watchlistContainer.appendChild(card);
   });
 
-  // Remove button listeners
   watchlistContainer.querySelectorAll('.remove-btn').forEach(btn => {
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
@@ -240,7 +221,6 @@ function renderWatchlist() {
   });
 }
 
-// ── Render Payouts ─────────────────────────────
 function renderPayouts() {
   payoutsContainer.innerHTML = '';
 
@@ -257,7 +237,6 @@ function renderPayouts() {
   emptyPayouts.style.display = 'none';
   payoutsContainer.style.display = 'flex';
 
-  // Section header
   const header = document.createElement('div');
   header.className = 'section-header';
   header.textContent = 'Upcoming Payouts';
@@ -292,12 +271,10 @@ function renderPayouts() {
   });
 }
 
-// ── Footer ─────────────────────────────────────
 function updateFooter() {
   const n = watchlist.filter(s => !!stockData[s]).length;
   stockCount.textContent = n + ' stock' + (n !== 1 ? 's' : '');
 
-  // Update live/mock badge — always reads from api.js/api-live.js
   const badge = document.getElementById('data-source-badge');
   if (badge) {
     const src = window.dataSource || 'mock';
@@ -306,7 +283,6 @@ function updateFooter() {
   }
 }
 
-// ── Helpers ────────────────────────────────────
 function formatPrice(price) {
   return price.toLocaleString('en-PK', {
     minimumFractionDigits: 2,
