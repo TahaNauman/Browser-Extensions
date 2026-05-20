@@ -7,6 +7,7 @@ A collection of lightweight, focused browser extensions I build for fun and prod
 | Extension | Description |
 |---|---|
 | [QuickTask](./quicktask/) | A minimal task manager that lives in your browser toolbar |
+| [PSX Watchlist](./psxwatchlist/) | A watchlist for my stock portfolio which tells about change in prices and payouts |
 
 
 ## Development
