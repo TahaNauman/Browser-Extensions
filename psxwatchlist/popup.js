@@ -1,3 +1,5 @@
+import { validateSymbol, fetchStockData, fetchPayoutData } from './api.js';
+
 let watchlist  = [];   // ['MARI', 'HBL', ...]
 let stockData  = {};   // { MARI: { price, change, ... }, ... }
 let payoutData = {};   // { HBL: { type, amount, exDate }, ... }

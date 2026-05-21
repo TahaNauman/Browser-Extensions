@@ -1,10 +1,13 @@
-const WORKER_BASE = 'https://my-worker-name.workers.dev';
+import url from './worker_url.js';
+
+const WORKER_BASE = url.url;
+
+
 window.dataSource = 'live';
 
-// ── Market cache (all stocks, refreshed every 60s) ────────
-let marketCache     = {};
-let marketCacheTime = 0;
-const CACHE_TTL     = 60000; // 60 seconds
+// ── Cache ─────────────────────────────────────────────────
+const stockCache = {};     // { HBL: { price, change, ... } }
+const CACHE_TTL  = 60000;  // 60 seconds
 
 // ── Fallback mock data ────────────────────────────────────
 const MOCK_STOCKS = {
@@ -45,62 +48,52 @@ async function fetchWithTimeout(url, ms = 8000) {
   }
 }
 
-// ── Load full market (one request, all stocks) ────────────
-async function loadMarket() {
-  const now = Date.now();
-  if (Object.keys(marketCache).length > 0 && now - marketCacheTime < CACHE_TTL) {
-    return marketCache;
-  }
-
-  try {
-    const result = await fetchWithTimeout(`${WORKER_BASE}/market`);
-    if (!result.success) throw new Error(result.error || 'Bad response');
-
-    const list = result.data || [];
-    list.forEach(s => { marketCache[s.symbol] = { ...s, source: 'live' }; });
-    marketCacheTime = now;
-
-    window.dataSource = 'live';
-    console.log(`[PSX Watch] Loaded ${list.length} stocks from ksestocks.com`);
-    return marketCache;
-
-  } catch (err) {
-    console.warn('[PSX Watch] Market load failed:', err.message);
-    window.dataSource = 'mock';
-    return null;
-  }
-}
-
 // ── Public API ────────────────────────────────────────────
 
+// Validate by trying to fetch — if it returns data it's valid
 async function validateSymbol(symbol) {
-  const s     = symbol.toUpperCase();
-  const cache = await loadMarket();
-  if (cache && Object.keys(cache).length > 0) {
-    return { valid: !!cache[s], known: !!cache[s] };
-  }
-  // Market fetch failed — fall back to mock check
-  return { valid: !!MOCK_STOCKS[s], known: !!MOCK_STOCKS[s] };
-}
-
-async function fetchStockData(symbol) {
   const s = symbol.toUpperCase();
   try {
-    const cache = await loadMarket();
-    if (cache && cache[s]) return cache[s];
-    throw new Error('Not in market data');
-  } catch (err) {
-    console.warn(`[PSX Watch] fetchStockData failed for ${s}:`, err.message);
-    window.dataSource = 'mock';
-    const mock = MOCK_STOCKS[s];
-    return mock ? { symbol: s, ...mock, source: 'mock' } : null;
+    const result = await fetchWithTimeout(`${WORKER_BASE}/stock/${s}`);
+    return { valid: result.success, known: result.success };
+  } catch (e) {
+    // Worker down — allow it, mock will handle
+    return { valid: true, known: !!MOCK_STOCKS[s] };
   }
 }
 
+// Fetch single stock — uses per-symbol PSX page
+async function fetchStockData(symbol) {
+  const s   = symbol.toUpperCase();
+  const now = Date.now();
+
+  // Return cached if fresh
+  if (stockCache[s] && now - stockCache[s]._ts < CACHE_TTL) {
+    return stockCache[s];
+  }
+
+  try {
+    const result = await fetchWithTimeout(`${WORKER_BASE}/stock/${s}`);
+    if (!result.success) throw new Error(result.error || 'Failed');
+
+    const data = { ...result.data, source: 'live', _ts: now };
+    stockCache[s] = data;
+    window.dataSource = 'live';
+    return data;
+
+  } catch (err) {
+    console.warn(`[PSX Watch] Live fetch failed for ${s}:`, err.message);
+    window.dataSource = 'mock';
+    const mock = MOCK_STOCKS[s];
+    return mock ? { symbol: s, ...mock, source: 'mock', _ts: now } : null;
+  }
+}
+
+// Payouts still use mock — dps.psx.com.pk/payouts page is JS rendered
 async function fetchPayoutData(symbol) {
   const s    = symbol.toUpperCase();
-  // Payouts still use mock for now — ksestocks has a separate
-  // BookClosures page we can scrape in a future update
   const mock = MOCK_PAYOUTS[s];
   return mock ? { symbol: s, ...mock, source: 'mock' } : null;
 }
+
+export { validateSymbol, fetchStockData, fetchPayoutData };
