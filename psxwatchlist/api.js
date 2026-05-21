@@ -1,6 +1,6 @@
-import url from './worker_url.js';
+import config from './worker_url.js';
 
-const WORKER_BASE = url.url;
+const WORKER_BASE = config.url;
 
 
 window.dataSource = 'live';
