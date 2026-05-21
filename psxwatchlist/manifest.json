@@ -12,7 +12,7 @@
   ],
   "host_permissions": [
     "https://*.workers.dev/*",
-    "https://www.ksestocks.com/*"
+    "https://dps.psx.com.pk/*"
   ],
   "commands": {
     "_execute_action": {
